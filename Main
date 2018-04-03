@@ -1,0 +1,58 @@
+.data
+	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang giam dan theo Bubble sort\n10. Thoat\n================================\nChon:"
+	chonsai: .asciiz "Chon sai chuc nang. Vui long chon lai. "
+.text
+	.globl main
+main:
+	#Xuat Menu
+XuatMenu:
+	li $v0,4
+	la $a0,menu
+	syscall
+
+	#Chon chuc nang
+	li $v0,5
+	syscall
+
+	#Luu vao $t2
+	move $t2,$v0
+	
+	beq $t2,1,NhapMang
+	beq $t2,2,XuatMang
+	beq $t2,3,LietKeNguyenTo
+	beq $t2,4,LietKeHoanThien
+	beq $t2,5,TongSoChinhPhuong
+	beq $t2,6,TrungBinhCongSoDoiXung
+	beq $t2,7,GiaTriLonNhat
+	beq $t2,8,SapXepTangDanSelectionSort
+	beq $t2,9,SapXepGiamDanBubbleSort
+	beq $t2,10,Thoat
+	j NhapSai
+
+NhapMang:
+
+XuatMang:
+
+LietKeNguyenTo:
+
+LietKeHoanThien:
+
+TongSoChinhPhuong:
+
+TrungBinhCongSoDoiXung:
+
+GiaTriLonNhat:
+
+SapXepTangDanSelectionSort:
+
+SapXepGiamDanBubbleSort:
+
+NhapSai:
+	# xuat tb8
+	li $v0,4
+	la $a0,chonsai
+	syscall
+	j XuatMenu
+Thoat:
+	li $v0,10
+	syscall
