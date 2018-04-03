@@ -1,6 +1,14 @@
 .data
 	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang giam dan theo Bubble sort\n10. Thoat\n================================\nChon:"
-	chonsai: .asciiz "Chon sai chuc nang. Vui long chon lai. "
+	tbChonSai: .asciiz "Chon sai chuc nang. Vui long chon lai.\n "
+	tbNhapN: .asciiz "Nhap N: "
+	tbA_1: .asciiz "a["
+	tbA_2: .asciiz "]: "
+	tbXuat: .asciiz "Mang vua nhap : "
+	tbXuongHang: .asciiz "\n"
+	n: .word 0
+	arr: .space 80
+	
 .text
 	.globl main
 main:
@@ -30,8 +38,101 @@ XuatMenu:
 	j NhapSai
 
 NhapMang:
+	#Xuat thong bao nhap N
+	li $v0,4
+	la $a0,tbNhapN
+	syscall
 
+	#Nhap so nguyen 
+	li $v0,5
+	syscall
+
+	#Luu vao N
+	sw $v0,n
+
+
+	#Load N vao $s1
+	lw $s1,n
+
+	#Khoi tao vong lap 
+	li $t0,0 #i=0
+	la $s0,arr #Load dia chi mang vao $s0
+
+LapNhap:
+	
+	#Xuat tbA_1
+	li $v0,4
+	la $a0,tbA_1
+	syscall
+
+	#xuat chi so i
+	li $v0,1
+	move $a0,$t0
+	syscall
+
+	#Xuat tbA_2
+	li $v0,4
+	la $a0,tbA_2
+	syscall
+
+	#Nhap so nguyen
+	li $v0,5
+	syscall
+
+	#Luu vao a[i] ($s0)
+	sw $v0,($s0)
+	
+	#Tang dia chi mang
+	addi $s0,$s0,4
+	
+	#Tang chi so i
+	addi $t0,$t0,1
+	
+	slt $t1,$t0,$s1
+	beq $t1,1,LapNhap
+
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
 XuatMang:
+	
+	#Xuat tbXuat
+	li $v0,4
+	la $a0,tbXuat
+	syscall
+
+	#Khoi tao vong lap
+	li $t0,0
+	la $s0,arr
+
+LapXuat:
+
+	#xuat a[i]
+	li $v0,1
+	lw $a0,($s0)
+	syscall
+
+	#xuat khoang trang
+	li $v0,11
+	li $a0,32 #32 = khoang trang
+	syscall
+
+	#tang dia chi mang
+	addi $s0,$s0,4
+	
+	#Tang chi so i
+	addi $t0,$t0,1
+
+	slt $t1,$t0,$s1 # xet i < n
+	beq $t1,1,LapXuat
+	
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
 
 LietKeNguyenTo:
 
@@ -50,7 +151,7 @@ SapXepGiamDanBubbleSort:
 NhapSai:
 	# xuat tb8
 	li $v0,4
-	la $a0,chonsai
+	la $a0,tbChonSai
 	syscall
 	j XuatMenu
 Thoat:
