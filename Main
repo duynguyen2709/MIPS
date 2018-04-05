@@ -8,13 +8,18 @@
 	tbXuongHang: .asciiz "\n"
 	tbSoNguyenTo: .asciiz "So nguyen to trong mang : "
 	tbSoHoanThien : .asciiz "So hoan thien trong mang : "
+	tbTongSoChinhPhuong : .asciiz "Tong so chinh phuong trong mang : "
 	n: .word 0
 	arr: .space 80
 	
 .text
 	.globl main
 main:
-	#Xuat Menu
+####################################################################################
+#
+#	Xuat Menu
+#
+####################################################################################
 XuatMenu:
 	li $v0,4
 	la $a0,menu
@@ -39,6 +44,11 @@ XuatMenu:
 	beq $t2,10,Thoat
 	j NhapSai
 
+####################################################################################
+#					
+#	NHAP MANG
+#
+####################################################################################
 NhapMang:
 	#Xuat thong bao nhap N
 	li $v0,4
@@ -98,6 +108,12 @@ LapNhap:
 	la $a0,tbXuongHang
 	syscall
 	j XuatMenu
+
+####################################################################################
+#					
+#	XUAT MANG
+#
+####################################################################################
 XuatMang:
 	
 	#Xuat tbXuat
@@ -136,6 +152,11 @@ LapXuat:
 	syscall
 	j XuatMenu
 
+####################################################################################
+#					
+#	LIET KE SO NGUYEN TO
+#
+####################################################################################
 LietKeSoNguyenTo:
 	#Backup thanh ghi
 	addi $sp,$sp, -20
@@ -167,28 +188,28 @@ KTNT.BatDau:
 
 	move $s2 $zero
 
-KTNT.KiemTraDKLap:
+KTNT.KiemTraTSCP.KiemTraDKLap:
 	sub $s4 $s0 $s1
-	bltz $s4 KTNT.VongLap
+	bltz $s4 KTNT.TSCP.VongLap
 	bgez $s4 KTNT.SoSanhDem
 
-KTNT.VongLap:
+KTNT.TSCP.VongLap:
 	div $s1 $s0
 	mfhi $s3
 	beq $s3 $zero KTNT.TangDem
 	
-KTNT.TangI: 
+KTNT.TSCP.TangI: 
 	addi $s0 $s0 1
-	j KTNT.KiemTraDKLap
+	j KTNT.KiemTraTSCP.KiemTraDKLap
 	
 KTNT.TangDem:
 	addi $s2 $s2 1
-	j KTNT.TangI
+	j KTNT.TSCP.TangI
 
 KTNT.SoSanhDem:
 	sub $s2 $s2 1
 	beq $s2 $zero KTNT.InGiaTri
-	bne $s2 $zero KTNT.KetThuc
+	bne $s2 $zero KTNT.TSCP.KetThuc
 
 KTNT.InGiaTri:
 	#xuat a[i]
@@ -201,7 +222,7 @@ KTNT.InGiaTri:
 	li $a0,32 #32 = khoang trang
 	syscall
 	
-KTNT.KetThuc:
+KTNT.TSCP.KetThuc:
 	lw $ra ($sp)
 	lw $s0 4($sp)
 	lw $s1 8($sp)
@@ -230,7 +251,11 @@ KTNT.KetThuc:
 	syscall
 	j XuatMenu
 
-
+####################################################################################
+#					
+#	LIET KE SO HOAN THIEN
+#
+####################################################################################
 LietKeSoHoanThien:
 	#Backup
 	addi $sp,$sp, -20
@@ -261,24 +286,24 @@ KTHT.BatDau:
 	move $s0 $zero
 	addi $s0 $s0 1
 	move $s5 $zero
-	ble $s1 $zero KTHT.KetThuc
-	KTHT.KiemTraDKLap:
+	ble $s1 $zero KTHT.TSCP.KetThuc
+	KTHT.KiemTraTSCP.KiemTraDKLap:
 	sub $s4 $s0 $s1
 	bgez $s4 KTHT.Xet
 	
-KTHT.VongLap:
+KTHT.TSCP.VongLap:
 	div $s1 $s0
 	mfhi $s3
 	beq $s3 $zero KTHT.TinhTong
-	j KTHT.TangI 
+	j KTHT.TSCP.TangI 
 
-KTHT.TangI:
+KTHT.TSCP.TangI:
 	addi $s0 $s0 1
-	j KTHT.KiemTraDKLap
+	j KTHT.KiemTraTSCP.KiemTraDKLap
 	
 KTHT.TinhTong:
 	add $s5 $s5 $s0
-	j KTHT.TangI
+	j KTHT.TSCP.TangI
 	
 KTHT.InGiaTri:
 	#xuat a[i]
@@ -290,12 +315,12 @@ KTHT.InGiaTri:
 	li $v0,11
 	li $a0,32 #32 = khoang trang
 	syscall
-	j KTHT.KetThuc
+	j KTHT.TSCP.KetThuc
 
 KTHT.Xet:
 	beq $s5 $s1 KTHT.InGiaTri
 
-KTHT.KetThuc:
+KTHT.TSCP.KetThuc:
 	#backup
 	lw $ra ($sp)
 	lw $s0 4($sp)
@@ -325,14 +350,121 @@ KTHT.KetThuc:
 	syscall
 	j XuatMenu
 
+####################################################################################
+#					
+#	TINH TONG SO CHINH PHUONG
+#
+####################################################################################
 TongSoChinhPhuong:
+	#Xuat thongbao
+	addi $sp,$sp, -24
+	sw $ra ($sp)
+	sw $t0 4($sp)
+	sw $s0 8($sp)
+	sw $s1 12($sp)
+	sw $t1 16($sp)
+	sw $s5 20($sp)
+	move $s5 $zero
+	
+	li $v0,4
+	la $a0,tbTongSoChinhPhuong
+	syscall
 
+	li $t0,0
+	la $s0,arr
+TSCP.BatDau:
+
+	#backup
+	addi $sp,$sp, -20
+	sw $ra ($sp)
+	sw $s0 4($sp)
+	sw $s1 8($sp)
+	sw $s4 12($sp)
+	sw $s3 16($sp)
+
+	# i=$s0 n=$s1 
+	lw $s1 ($s0)
+	move $s0 $zero
+
+TSCP.KiemTraDKLap:
+	sub $s4 $s0 $s1
+	bltz $s4 TSCP.VongLap
+	j TSCP.KetThuc
+
+TSCP.VongLap:
+	mult $s0 $s0
+	mflo $s3
+	sub $s4 $s3 $s1
+	beq $s4 $zero TSCP.InGiaTri
+	j TSCP.TangI
+TSCP.TangI:
+	addi $s0 $s0 1
+	j TSCP.KiemTraDKLap
+	
+TSCP.InGiaTri:
+	add $s5 $s5 $s1
+	
+TSCP.KetThuc:
+	#backup
+	lw $ra ($sp)
+	lw $s0 4($sp)
+	lw $s1 8($sp)
+	lw $s4 12($sp)
+	lw $s3 16($sp)
+
+	addi $sp,$sp, 20
+
+	#tang dia chi mang
+	addi $s0,$s0,4
+	#Tang chi so i
+	addi $t0,$t0,1
+	slt $t1,$t0,$s1 # xet i < n
+	beq $t1,1,TSCP.BatDau
+	
+	li $v0 1
+	move $a0 $s5
+	syscall
+
+	lw $ra ($sp)
+	lw $t0 4($sp)
+	lw $s0 8($sp)
+	lw $s1 12($sp)
+	lw $t1 16($sp)
+	lw $s5 20($sp)
+	addi $sp,$sp, 24
+	
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
+
+####################################################################################
+#					
+#	TINH TRUNG BINH CONG SO DOI XUNG
+#
+####################################################################################
 TrungBinhCongSoDoiXung:
 
+####################################################################################
+#					
+#	TIM GIA TRI LON NHAT TRONG MANG
+#
+####################################################################################
 GiaTriLonNhat:
 
+####################################################################################
+#					
+#	SAP XEP MANG TANG DAN BANG SELECTION SORT
+#
+####################################################################################
 SapXepTangDanSelectionSort:
 
+####################################################################################
+#					
+#	SAP XEP MANG GIAM DAN BANG BUBBLE SORT
+#
+####################################################################################
 SapXepGiamDanBubbleSort:
 	
 	la $t3, arr #Load dia chi mang
@@ -368,11 +500,22 @@ LapKeTiep:
 	move $t1, $s1 
 	j LapSapXep
 
+####################################################################################
+#					
+#	CHON SAI LUA CHON TRONG MENU
+#
+####################################################################################
 NhapSai:
 	li $v0,4
 	la $a0,tbChonSai
 	syscall
 	j XuatMenu
+
+####################################################################################
+#					
+#	THOAT CHUONG TRINH
+#
+####################################################################################
 Thoat:
 	li $v0,10
 	syscall
