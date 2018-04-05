@@ -7,6 +7,7 @@
 	tbXuat: .asciiz "Mang : "
 	tbXuongHang: .asciiz "\n"
 	tbSoNguyenTo: .asciiz "So nguyen to trong mang : "
+	tbSoHoanThien : .asciiz "So hoan thien trong mang : "
 	n: .word 0
 	arr: .space 80
 	
@@ -28,8 +29,8 @@ XuatMenu:
 	
 	beq $t2,1,NhapMang
 	beq $t2,2,XuatMang
-	beq $t2,3,LietKeNguyenTo
-	beq $t2,4,LietKeHoanThien
+	beq $t2,3,LietKeSoNguyenTo
+	beq $t2,4,LietKeSoHoanThien
 	beq $t2,5,TongSoChinhPhuong
 	beq $t2,6,TrungBinhCongSoDoiXung
 	beq $t2,7,GiaTriLonNhat
@@ -135,7 +136,7 @@ LapXuat:
 	syscall
 	j XuatMenu
 
-LietKeNguyenTo:
+LietKeSoNguyenTo:
 	#Backup thanh ghi
 	addi $sp,$sp, -20
 	sw $ra ($sp)
@@ -230,7 +231,99 @@ KTNT.KetThuc:
 	j XuatMenu
 
 
-LietKeHoanThien:
+LietKeSoHoanThien:
+	#Backup
+	addi $sp,$sp, -20
+	sw $ra ($sp)
+	sw $t0 4($sp)
+	sw $s0 8($sp)
+	sw $s1 12($sp)
+	sw $t1 16($sp)
+	li $v0,4
+	la $a0,tbSoHoanThien
+	syscall
+
+	li $t0,0
+	la $s0,arr
+
+KTHT.BatDau:
+	#backup
+	addi $sp,$sp, -24
+	sw $ra ($sp)
+	sw $s0 4($sp)
+	sw $s1 8($sp)
+	sw $s4 12($sp)
+	sw $s3 16($sp)
+	sw $s5 20($sp)
+
+	# i=$s0 n=$s1 
+	lw $s1 ($s0)
+	move $s0 $zero
+	addi $s0 $s0 1
+	move $s5 $zero
+	ble $s1 $zero KTHT.KetThuc
+	KTHT.KiemTraDKLap:
+	sub $s4 $s0 $s1
+	bgez $s4 KTHT.Xet
+	
+KTHT.VongLap:
+	div $s1 $s0
+	mfhi $s3
+	beq $s3 $zero KTHT.TinhTong
+	j KTHT.TangI 
+
+KTHT.TangI:
+	addi $s0 $s0 1
+	j KTHT.KiemTraDKLap
+	
+KTHT.TinhTong:
+	add $s5 $s5 $s0
+	j KTHT.TangI
+	
+KTHT.InGiaTri:
+	#xuat a[i]
+	li $v0,1
+	move $a0,$s1
+	syscall
+
+	#xuat khoang trang
+	li $v0,11
+	li $a0,32 #32 = khoang trang
+	syscall
+	j KTHT.KetThuc
+
+KTHT.Xet:
+	beq $s5 $s1 KTHT.InGiaTri
+
+KTHT.KetThuc:
+	#backup
+	lw $ra ($sp)
+	lw $s0 4($sp)
+	lw $s1 8($sp)
+	lw $s4 12($sp)
+	lw $s3 16($sp)
+	lw $s5 20($sp)
+	addi $sp,$sp, 24
+	
+	#tang dia chi mang
+	addi $s0,$s0,4
+	#Tang chi so i
+	addi $t0,$t0,1
+	slt $t1,$t0,$s1 # xet i < n
+	beq $t1,1,KTHT.BatDau
+
+	lw $ra ($sp)
+	lw $t0 4($sp)
+	lw $s0 8($sp)
+	lw $s1 12($sp)
+	lw $t1 16($sp)
+	addi $sp,$sp, 20
+	
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
 
 TongSoChinhPhuong:
 
