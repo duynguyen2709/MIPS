@@ -1,5 +1,5 @@
 .data
-	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang giam dan theo Bubble sort\n10. Thoat\n================================\nChon:"
+	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang TBDX.TangDem dan theo Bubble sort\n10. Thoat\n================================\nChon:"
 	tbChonSai: .asciiz "Chon sai chuc nang. Vui long chon lai.\n "
 	tbNhapN: .asciiz "Nhap N: "
 	tbA_1: .asciiz "a["
@@ -9,6 +9,8 @@
 	tbSoNguyenTo: .asciiz "So nguyen to trong mang : "
 	tbSoHoanThien : .asciiz "So hoan thien trong mang : "
 	tbTongSoChinhPhuong : .asciiz "Tong so chinh phuong trong mang : "
+	tb5: .asciiz "\nTong cua mang: "
+	tbTrungBinhSoDoiXung: .asciiz "\nTrung binh cong cac so doi xung trong mang : "
 	n: .word 0
 	arr: .space 80
 	
@@ -40,7 +42,7 @@ XuatMenu:
 	beq $t2,6,TrungBinhCongSoDoiXung
 	beq $t2,7,GiaTriLonNhat
 	beq $t2,8,SapXepTangDanSelectionSort
-	beq $t2,9,SapXepGiamDanBubbleSort
+	beq $t2,9,SapXepTBDX.TangDemDanBubbleSort
 	beq $t2,10,Thoat
 	j NhapSai
 
@@ -294,14 +296,14 @@ KTHT.BatDau:
 KTHT.TSCP.VongLap:
 	div $s1 $s0
 	mfhi $s3
-	beq $s3 $zero KTHT.TinhTong
+	beq $s3 $zero KTHT.TBDX.TinhTong
 	j KTHT.TSCP.TangI 
 
 KTHT.TSCP.TangI:
 	addi $s0 $s0 1
 	j KTHT.KiemTraTSCP.KiemTraDKLap
 	
-KTHT.TinhTong:
+KTHT.TBDX.TinhTong:
 	add $s5 $s5 $s0
 	j KTHT.TSCP.TangI
 	
@@ -445,6 +447,113 @@ TSCP.KetThuc:
 #
 ####################################################################################
 TrungBinhCongSoDoiXung:
+	#Khai bao tong
+	li $s2,0
+	
+	#Khoi tao vong lap
+	li $t0,0
+	la $s0,arr
+	
+TBDX.VongLap:
+	#Lay gia tri a[i] vao $t2
+	lw $t2,($s0)
+	li $s4,0
+	jal KTDX
+	move $t4,$v0
+	beq $t4,1,TBDX.TinhTong
+	beq $t4,0,TBDX.TangDem
+	
+TBDX.KiemTraDKLap:
+	#tang dia chi mang
+	addi $s0,$s0,4
+	
+	#Tang chi so i
+	addi $t0,$t0,1
+	
+	slt $t1,$t0,$s1
+	beq $t1,1,TBDX.VongLap
+	j TBDX.KetQua
+
+TBDX.TinhTong:
+	add $s2,$s2,$t2
+	j TBDX.KiemTraDKLap
+	
+TBDX.TangDem:
+	addi $s4,$s4,1
+	j TBDX.KiemTraDKLap
+
+TBDX.KetQua:
+	
+	#Xuat tbTrungBinhSoDoiXung
+	li $v0,4
+	la $a0,tbTrungBinhSoDoiXung
+	syscall
+
+	#Tinh TB
+	move $s5,$s1
+	sub $s5,$s5,$s4
+	div $s2,$s2,$s5
+
+	#Xuat TB
+	li $v0,1
+	move $a0,$s2
+	syscall
+	
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
+	
+#======== Ham Kiem Tra Doi Xung ===========
+
+KTDX:
+
+	#Khai bao kich thuoc stack
+	addi $sp,$sp,-16
+	
+	#Backup thanh ghi
+	sw $ra,($sp)
+	sw $s0,4($sp)
+	sw $t0,8($sp)
+	sw $t1,12($sp)
+
+	
+	#khoi tao vong lap
+	li $v0,0
+	li $t8, 10 
+	li $s3,0
+	move $a1,$t2
+	
+KTDX.Lap:
+	div $a1,$t8
+	mfhi $t1
+	mflo $t3
+	move $a1,$t3
+	add $s3,$s3,$t1
+	
+	beq $s3,$t2,KTDX.Return1
+	mult $s3,$t8
+	mflo $s3
+
+	beq $a1,0,KTDX.KetThuc
+	j KTDX.Lap
+
+KTDX.Return1:
+	li $v0,1
+	
+
+KTDX.KetThuc:
+	#Reset thanh ghi
+	lw $ra,($sp)
+	lw $s0,4($sp)
+	lw $t0,8($sp)
+	lw $t1,12($sp)
+	#Xoa stack
+	addi $sp,$sp,16
+
+	#Nhay ve dia chi goi ham
+	jr $ra
 
 ####################################################################################
 #					
@@ -462,10 +571,10 @@ SapXepTangDanSelectionSort:
 
 ####################################################################################
 #					
-#	SAP XEP MANG GIAM DAN BANG BUBBLE SORT
+#	SAP XEP MANG TBDX.TangDem DAN BANG BUBBLE SORT
 #
 ####################################################################################
-SapXepGiamDanBubbleSort:
+SapXepTBDX.TangDemDanBubbleSort:
 	
 	la $t3, arr #Load dia chi mang
 	
@@ -478,7 +587,7 @@ LapSapXep:
 	addi $t0, $t0, -1 
 	addi $t1, $t1, -1
 
-	blez $t1, LapKeTiep #j=0 , reset j,giam i
+	blez $t1, LapKeTiep #j=0 , reset j,TBDX.TangDem i
 
 	lw $t2, 0($t3) 
 	lw $t4, 4($t3)
