@@ -1,5 +1,5 @@
 .data
-	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang TBDX.TangDem dan theo Bubble sort\n10. Thoat\n================================\nChon:"
+	menu : .asciiz "============= Menu ============\n1. Nhap mang\n2. Xuat mang\n3. Liet ke so nguyen to trong mang\n4. Liet ke so hoan thien trong mang\n5. Tinh tong cac so chinh phuong trong mang\n6. Tính trung binh cong các so doi xung trong mang\n7. Tim gia tri lon nhat trong mang\n8. Sap xep mang tang dan theo Selection sort\n9. Sap xep mang giam dan theo Bubble sort\n10. Thoat\n================================\nChon:"
 	tbChonSai: .asciiz "Chon sai chuc nang. Vui long chon lai.\n "
 	tbNhapN: .asciiz "Nhap N: "
 	tbA_1: .asciiz "a["
@@ -9,8 +9,8 @@
 	tbSoNguyenTo: .asciiz "So nguyen to trong mang : "
 	tbSoHoanThien : .asciiz "So hoan thien trong mang : "
 	tbTongSoChinhPhuong : .asciiz "Tong so chinh phuong trong mang : "
-	tb5: .asciiz "\nTong cua mang: "
 	tbTrungBinhSoDoiXung: .asciiz "\nTrung binh cong cac so doi xung trong mang : "
+	tbMax: .asciiz "Phan tu lon nhat trong mang: "
 	n: .word 0
 	arr: .space 80
 	
@@ -42,7 +42,7 @@ XuatMenu:
 	beq $t2,6,TrungBinhCongSoDoiXung
 	beq $t2,7,GiaTriLonNhat
 	beq $t2,8,SapXepTangDanSelectionSort
-	beq $t2,9,SapXepTBDX.TangDemDanBubbleSort
+	beq $t2,9,SapXepGiamDanBubbleSort
 	beq $t2,10,Thoat
 	j NhapSai
 
@@ -174,6 +174,7 @@ LietKeSoNguyenTo:
 
 	li $t0,0
 	la $s0,arr
+	
 KTNT.BatDau:
 	addi $sp,$sp, -24
 	sw $ra ($sp)
@@ -190,28 +191,28 @@ KTNT.BatDau:
 
 	move $s2 $zero
 
-KTNT.KiemTraTSCP.KiemTraDKLap:
+KTNT.KiemTraDKLap:
 	sub $s4 $s0 $s1
-	bltz $s4 KTNT.TSCP.VongLap
+	bltz $s4 KTNT.VongLap
 	bgez $s4 KTNT.SoSanhDem
 
-KTNT.TSCP.VongLap:
+KTNT.VongLap:
 	div $s1 $s0
 	mfhi $s3
 	beq $s3 $zero KTNT.TangDem
 	
-KTNT.TSCP.TangI: 
+KTNT.TangI: 
 	addi $s0 $s0 1
-	j KTNT.KiemTraTSCP.KiemTraDKLap
+	j KTNT.KiemTraDKLap
 	
 KTNT.TangDem:
 	addi $s2 $s2 1
-	j KTNT.TSCP.TangI
+	j KTNT.TangI
 
 KTNT.SoSanhDem:
 	sub $s2 $s2 1
 	beq $s2 $zero KTNT.InGiaTri
-	bne $s2 $zero KTNT.TSCP.KetThuc
+	bne $s2 $zero KTNT.KetThuc
 
 KTNT.InGiaTri:
 	#xuat a[i]
@@ -224,7 +225,7 @@ KTNT.InGiaTri:
 	li $a0,32 #32 = khoang trang
 	syscall
 	
-KTNT.TSCP.KetThuc:
+KTNT.KetThuc:
 	lw $ra ($sp)
 	lw $s0 4($sp)
 	lw $s1 8($sp)
@@ -288,24 +289,24 @@ KTHT.BatDau:
 	move $s0 $zero
 	addi $s0 $s0 1
 	move $s5 $zero
-	ble $s1 $zero KTHT.TSCP.KetThuc
-	KTHT.KiemTraTSCP.KiemTraDKLap:
+	ble $s1 $zero KTHT.KetThuc
+	KTHT.KiemTraDKLap:
 	sub $s4 $s0 $s1
 	bgez $s4 KTHT.Xet
 	
-KTHT.TSCP.VongLap:
+KTHT.VongLap:
 	div $s1 $s0
 	mfhi $s3
-	beq $s3 $zero KTHT.TBDX.TinhTong
-	j KTHT.TSCP.TangI 
+	beq $s3 $zero KTHT.TinhTong
+	j KTHT.TangI 
 
-KTHT.TSCP.TangI:
+KTHT.TangI:
 	addi $s0 $s0 1
-	j KTHT.KiemTraTSCP.KiemTraDKLap
+	j KTHT.KiemTraDKLap
 	
-KTHT.TBDX.TinhTong:
+KTHT.TinhTong:
 	add $s5 $s5 $s0
-	j KTHT.TSCP.TangI
+	j KTHT.TangI
 	
 KTHT.InGiaTri:
 	#xuat a[i]
@@ -317,12 +318,12 @@ KTHT.InGiaTri:
 	li $v0,11
 	li $a0,32 #32 = khoang trang
 	syscall
-	j KTHT.TSCP.KetThuc
+	j KTHT.KetThuc
 
 KTHT.Xet:
 	beq $s5 $s1 KTHT.InGiaTri
 
-KTHT.TSCP.KetThuc:
+KTHT.KetThuc:
 	#backup
 	lw $ra ($sp)
 	lw $s0 4($sp)
@@ -561,6 +562,59 @@ KTDX.KetThuc:
 #
 ####################################################################################
 GiaTriLonNhat:
+	
+	#Khoi tao lai dia chi mang
+	la $s0,arr
+
+	lw $t5,($s0)
+	la $t6,($s0)
+	addi $s0,$s0,4
+
+	#Khoi tao vong lap
+	li $t0,1
+	
+GTLN.VongLap:
+	lw $t3,($s0)
+	slt $t1,$t5,$t3
+	beq $t1,1,GTLN.GanMax
+	j GTLN.PhanTuKeTiep
+	
+GTLN.GanMax:
+	move $t5,$t3
+	la $t6,($s0)
+	j GTLN.PhanTuKeTiep	
+		
+GTLN.PhanTuKeTiep:
+	#Tang chi so i
+	addi $t0,$t0,1
+
+	#Tang dia chi mang
+	addi $s0,$s0,4
+	
+	#Kiem tra dieu kien lap
+	slt $t1,$t0,$s1
+	beq $t1,0,GTLN.InMax
+	j GTLN.VongLap
+
+
+GTLN.InMax:
+	#Xuat tb1:
+	li $v0,4
+	la $a0,tbMax
+	syscall
+
+	#Xuat gia tri max trong mang
+	li $v0,1
+	move $a0,$t5
+	syscall
+
+	
+	#Tro lai menu chinh
+	li $v0,4
+	la $a0,tbXuongHang
+	syscall
+	j XuatMenu
+
 
 ####################################################################################
 #					
@@ -574,40 +628,40 @@ SapXepTangDanSelectionSort:
 #	SAP XEP MANG TBDX.TangDem DAN BANG BUBBLE SORT
 #
 ####################################################################################
-SapXepTBDX.TangDemDanBubbleSort:
+SapXepGiamDanBubbleSort:
 	
 	la $t3, arr #Load dia chi mang
 	
 	move $t0, $s1 #Bien j cua vong lap
 	move $t1, $s1 #Bien j cua vong lap
 	
-LapSapXep:
+SXGD.LapSapXep:
 	beqz $t0, XuatMang #het vong lap, xuat ket qua
 
 	addi $t0, $t0, -1 
 	addi $t1, $t1, -1
 
-	blez $t1, LapKeTiep #j=0 , reset j,TBDX.TangDem i
+	blez $t1, SXGD.LapKeTiep #j=0 , reset j,tang i
 
 	lw $t2, 0($t3) 
 	lw $t4, 4($t3)
-	blt $t2, $t4,DoiCho 
+	blt $t2, $t4,SXGD.DoiCho 
 
 	addi $t3, $t3, 4 #Duyet phan tu ke tiep cua mang
-	j LapSapXep
+	j SXGD.LapSapXep
 
-DoiCho: 
+SXGD.DoiCho: 
 	sw $t4, 0($t3) 
 	sw $t2, 4($t3) 
 	addi $t3, $t3, 4 
 	li $t0, 0 
 	move $t0,$s1
-	j LapSapXep
+	j SXGD.LapSapXep
 
-LapKeTiep: 
+SXGD.LapKeTiep: 
 	la $t3, arr 
 	move $t1, $s1 
-	j LapSapXep
+	j SXGD.LapSapXep
 
 ####################################################################################
 #					
@@ -625,6 +679,8 @@ NhapSai:
 #	THOAT CHUONG TRINH
 #
 ####################################################################################
+
+
 Thoat:
 	li $v0,10
 	syscall
