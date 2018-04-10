@@ -9,7 +9,7 @@
 	tbSoNguyenTo: .asciiz "So nguyen to trong mang : "
 	tbSoHoanThien : .asciiz "So hoan thien trong mang : "
 	tbTongSoChinhPhuong : .asciiz "Tong so chinh phuong trong mang : "
-	tbTrungBinhSoDoiXung: .asciiz "\nTrung binh cong cac so doi xung trong mang : "
+	tbTrungBinhSoDoiXung: .asciiz "\nTrung binh cong cac so doi xung (co' tinh' so' am) trong mang : "
 	tbMax: .asciiz "Phan tu lon nhat trong mang: "
 	n: .word 0
 	arr: .space 80
@@ -41,6 +41,7 @@ XuatMenu:
 	beq $t2,5,TongSoChinhPhuong
 	beq $t2,6,TrungBinhCongSoDoiXung
 	beq $t2,7,GiaTriLonNhat
+	li $a1,2
 	beq $t2,8,SapXepTangDanSelectionSort
 	beq $t2,9,SapXepGiamDanBubbleSort
 	beq $t2,10,Thoat
@@ -161,6 +162,7 @@ LapXuat:
 ####################################################################################
 LietKeSoNguyenTo:
 	#Backup thanh ghi
+	addi $sp,$zero,0
 	addi $sp,$sp, -20
 	sw $ra ($sp)
 	sw $t0 4($sp)
@@ -261,6 +263,7 @@ KTNT.KetThuc:
 ####################################################################################
 LietKeSoHoanThien:
 	#Backup
+	addi $sp,$zero,0
 	addi $sp,$sp, -20
 	sw $ra ($sp)
 	sw $t0 4($sp)
@@ -360,6 +363,7 @@ KTHT.KetThuc:
 ####################################################################################
 TongSoChinhPhuong:
 	#Xuat thongbao
+	addi $sp,$zero,0
 	addi $sp,$sp, -24
 	sw $ra ($sp)
 	sw $t0 4($sp)
@@ -592,12 +596,16 @@ GTLN.PhanTuKeTiep:
 	addi $s0,$s0,4
 	
 	#Kiem tra dieu kien lap
+	
 	slt $t1,$t0,$s1
 	beq $t1,0,GTLN.InMax
 	j GTLN.VongLap
 
 
 GTLN.InMax:
+	subi $a1,$a1,1
+	beq $a1,0,SXTD.KiemTraDKLap
+
 	#Xuat tb1:
 	li $v0,4
 	la $a0,tbMax
@@ -623,9 +631,55 @@ GTLN.InMax:
 ####################################################################################
 SapXepTangDanSelectionSort:
 
+	#Khoi tao lai dia chi mang
+	la $s0,arr
+	la $s2,arr
+	move $s4,$s1
+	
+	#chuyen dia chi $s2 xuong cuoi mang
+	li $t1,1
+	
+	lw $t0,n
+	sub $t0,$t0,$t1
+	li $t1,4
+	mult $t1,$t0
+	mflo $t0
+	add $s2,$s2,$t0
+	la $sp,($ra)
+	jal SXTD.VongLap
+	
+	
+SXTD.VongLap:
+	li $a1,1
+	jal GiaTriLonNhat
+
+SXTD.KiemTraDKLap:	
+	jal SXTD.HoanVi
+	sub $s1,$s1,1
+	beq $s1,1,SXTD.KetThuc
+	jal SXTD.VongLap
+
+SXTD.KetThuc: 	
+	move $s1,$s4
+	j XuatMang
+
+SXTD.HoanVi:
+	lw $t1,($s2)
+	beq $t1,$t5,SXTD.TangI
+	add $t1,$t5,$t1
+	sub $t5,$t1,$t5
+	sub $t1,$t1,$t5
+	sw $t1,($s2)
+	sw $t5,($t6)
+	subi $s2,$s2,4
+	jr $ra
+	
+SXTD.TangI:
+	subi $s2,$s2,4
+	jr $ra
 ####################################################################################
 #					
-#	SAP XEP MANG TBDX.TangDem DAN BANG BUBBLE SORT
+#	SAP XEP MANG GIAM DAN BANG BUBBLE SORT
 #
 ####################################################################################
 SapXepGiamDanBubbleSort:
