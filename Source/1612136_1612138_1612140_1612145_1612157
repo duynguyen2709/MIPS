@@ -22,6 +22,8 @@ main:
 #	Xuat Menu
 #
 ####################################################################################
+
+#XUAT BANG MENU VA CHON CHUC NANG
 XuatMenu:
 	li $v0,4
 	la $a0,menu
@@ -33,7 +35,8 @@ XuatMenu:
 
 	#Luu vao $t2
 	move $t2,$v0
-	
+
+	#NHAY TOI HAM TUONG UNG
 	beq $t2,1,NhapMang
 	beq $t2,2,XuatMang
 	beq $t2,3,LietKeSoNguyenTo
@@ -243,6 +246,7 @@ KTNT.KetThuc:
 	slt $t1,$t0,$s1 # xet i < n
 	beq $t1,1,KTNT.BatDau
 
+	#RESTORE GIA TRI THANH GHI
 	lw $ra ($sp)
 	lw $t0 4($sp)
 	lw $s0 8($sp)
@@ -342,7 +346,8 @@ KTHT.KetThuc:
 	addi $t0,$t0,1
 	slt $t1,$t0,$s1 # xet i < n
 	beq $t1,1,KTHT.BatDau
-
+	
+	#RESTORE GIA TRI THANH GHI
 	lw $ra ($sp)
 	lw $t0 4($sp)
 	lw $s0 8($sp)
@@ -431,7 +436,8 @@ TSCP.KetThuc:
 	li $v0 1
 	move $a0 $s5
 	syscall
-
+	
+	#RESTORE GIA TRI THANH GHI
 	lw $ra ($sp)
 	lw $t0 4($sp)
 	lw $s0 8($sp)
